@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Sortir.com{% endblock %}</title>
+        <link rel="stylesheet" href="{{ asset('global.css') }}">
+        {% block css %}{% endblock %}
+    </head>
+    <body>
+        {% block delheader %}
+            <header class="space-between">
+                <a href="{{ path('main_accueil') }}"><div class="logo"><img src="{{ asset('img/logoAnim1.gif') }}" class="logo-display" width="200px"></div></a>
+                <nav>
+                    <ul class="row">
+                        {% if app.user %}
+                            {% if is_granted("ROLE_ADMIN") %}
+                            {% endif %}
+                        {% endif %}
+
+                        <li><a href="" title="modifier supprimer ajouter une ou des villes"> Villes </a></li>
+                        <li><a href="" title="modifier supprimer ajouter une ou des campus"> Campus </a></li>
+                            <!-- remmetre endif  -->
+                        <li><a href="" title="accéder a la page d'accueil du site"> Accueil </a></li>
+                        <li><a href="" title="modifier mon profile"> Mon profil </a></li>
+                        <li><a href="{{ path('app_logout') }}" title="Se déconnecter"> Se déconnecter </a></li>
+                        <li><a href="{{ path('app_admin_ajout_utilisateur') }}" title="Ajout Utilisateur">Ajout Utilisateur</a></li>
+                        <li><a href="{{ path('app_supprimer_user') }}" title="Désactiver / Supprimer un utilisateur">Désactiver - Supprimer un utilisateur</a></li>
+                        <li><a href="{{ path('app_admin_gestion_ville') }}" title="Désactiver / Supprimer un utilisateur">Gestion des villes</a></li>
+
+                        <!-- remettre endif -->
+                    </ul>
+                </nav>
+            </header>
+        {% endblock %}
+
+        {% for label,messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash - {{ label }}" style="background-color: greenyellow">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <main>
+            {% block body %}{% endblock %}
+            {% block javascripts %}{% endblock %}
+        </main>
+        <footer>
+
+        </footer>
+    </body>
+</html>

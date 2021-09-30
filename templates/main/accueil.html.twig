@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <h1>Filtrer les sorties</h1>
+
+    <div id="Filtre">
+        {{ form_start(filtre) }}
+            {{ form_widget(filtre) }}
+        <br><br><button type="submit" class="btn">Rechercher</button>
+        {{ form_end(filtre) }}
+
+    </div>
+
+    <h1>Sortie les plus ressentent</h1><br><br>
+    
+        
+    
+    {% if is_granted("ROLE_USER") %}
+   
+    <table>
+        <tr><th>Nom de la sortie</th><th>Date de la sortie</th><th>Clôture</th>
+            <th>Inscrits/Places</th><th>Etat</th>
+            <th>Inscrit</th>
+            <th>Organisateur</th>
+            <th>Action</th></tr>
+
+        {% for sortie in sorties %} 
+           
+              <tr>
+                <td>{{ sortie.nom }}</td><td>{{ sortie.dateHeureDebut|date ('d/m/Y h:m') }}</td><td>{{ sortie.dateLimiteInscription|date ('d/m/Y') }}</td>
+                   <td>{{ sortie.estInscrit|length }} / {{sortie.nbInscriptionsMax }}</td> <td>{{ sortie.etats }}</td>
+                <td>
+                    {% set inscrit = "false" %}
+
+                    
+                    {% for element in sortie.estInscrit %}
+                        {% if element.id == app.user.id|number_format  %}
+                            {% set inscrit = "true" %}  
+                        {% endif %}  
+                    {% endfor %}
+                    
+                    {% if inscrit == "true" %}
+                        OUI
+                    {% else %}
+                        NON
+                    {% endif %}
+                    
+                </td>
+                <td>
+
+                    <a href="#" title="{{ sortie.organisateur }}">{{ sortie.organisateur }}</a>
+                         {% set organisateur = null %}
+                        {% if sortie.organisateur == app.user.pseudo  %}
+                            {% set organisateur = "true" %}
+                        {% else %}
+                            {% set organisateur = "false" %}
+                        {% endif %}
+                </td>
+
+                <td>
+                    {% if sortie.etats == 'Activité en cours' or sortie.etats == 'Clôturée' or sortie.etats == 'Ouverte' %}
+                        <a href="{{ path('sortie_details',{'id':sortie.id}) }}" title="Afficher">Afficher</a>
+                    {% endif  %}
+                    {% if sortie.etats == 'En création' and  organisateur == 'true' %}
+                        <a href="{{ path('sortie_modif',{'id':sortie.id}) }}" title="Modifier">Modifier</a>
+                        <a href="{{ path('sortie_publish',{'id':sortie.id}) }}" title="Publier">Publier</a>
+                    {% endif  %}
+                    {% if  inscrit =='true' and organisateur == 'false' %}
+                        <a href="{{ path('sortie_desincrire',{'id':sortie.id}) }}" title="Se désister">Se désister</a>
+                    {% endif  %}
+                    {%if sortie.etats == 'Ouverte' and  inscrit == 'false' %}
+                        <a href="{{ path('sortie_inscrire',{'id':sortie.id}) }}" title="S'inscrire">S'inscrire</a>
+                    {% endif  %}
+                    {% for role in app.user.roles %}
+                        {% if (sortie.etats == 'Ouverte'  and sortie.estInscrit|length == 0 and  organisateur == 'true') or (sortie.etats == 'En création' and  organisateur == 'true') or (role == "ROLE_ADMIN") %}
+                            <a href="{{ path('sortie_cancel',{'id':sortie.id}) }}" title="Annuler'">Annuler</a>
+                        {% endif  %}
+                        
+                    {% endfor %}
+                   
+                    
+                </td>
+            </tr>
+        {% endfor %}
+
+    </table><br><br>
+    {% endif %}
+    <button><a href="{{ path('sortie_add') }}">Créer une sortie</a></button>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        let organisateurCheck = document.getElementById('sortie_filter_organisateur');
+        let inscritCheck = document.getElementById('sortie_filter_inscrit');
+        let pasInscritCheck = document.getElementById('sortie_filter_pasInscrit');
+
+        organisateurCheck.addEventListener('change',function(event){
+            if(event.target.select){
+            inscritCheck.checked = false;
+            pasInscritCheck.checked = false;
+
+        }
+        },false);
+
+        inscritCheck.addEventListener('change',function(event){
+        if(event.target.select){
+        organisateurCheck.checked = false;
+        pasInscritCheck.checked = false;
+
+        }
+        },false);
+
+        pasInscritCheck.addEventListener('change',function(event){
+        if(event.target.select){
+        inscritCheck.checked = false;
+        organisateurCheck.checked = false;
+
+        }
+        },false);
+
+    </script>
+
+{% endblock %}
